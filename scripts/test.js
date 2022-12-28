@@ -485,8 +485,8 @@ async function UpdateProductTest(){
 
     res = await sendRequest('/api/login', 'POST', reqBody)
     assert.equal(res.status, 201)
-    let jwt = (await res.json()).token
-    assert(jwt)
+    const workerJWT = (await res.json()).token
+    assert(workerJWT);
 
     // Check unauthorized post new product
     const test_product = {
@@ -497,9 +497,9 @@ async function UpdateProductTest(){
         "stock":11,
         "image":"shopify.com/s/files/1/0190",
     }
-    reqBody = JSON.stringify(test_product)
-    res = await sendRequest('/api/product', 'POST', reqBody, { authorization: `Bearer ${jwt}`})
-    assert.equal(res.status, 403)
+    // reqBody = JSON.stringify(test_product)
+    // res = await sendRequest('/api/product', 'POST', reqBody, { authorization: `Bearer ${jwt}`})
+    // assert.equal(res.status, 403)
 
 
     // admin login
@@ -519,16 +519,46 @@ async function UpdateProductTest(){
     assert.equal(res.status, 200)
     let product_out = await res.json()
     assert(Object.keys(product_out).length === 1)
- 
-    //Update product 
+
+    //Update product
+    reqBody= JSON.stringify({ "description":"a very ugly hat",})
+    //unauthorized users (worker) - 403
+    res = await sendRequest('/api/product/'+id_out, 'PUT', reqBody, { authorization: `Bearer ${workerJWT}`})
+    assert.equal(res.status, 403);
+    //authorized users - 200
+
+    //up the user to manager then create manager jwt token
+    const new_permission = {
+        "username":user,
+        "permission":"M",
+    }
+    reqBody = JSON.stringify(new_permission)
+    res = await sendRequest('/api/permission', 'PUT', reqBody, { authorization: `Bearer ${admin_jwt}`})
+    assert.equal(res.status, 200)
+
+    // get new token
+    reqBody = JSON.stringify({ username: user, password: pass })
+    res = await sendRequest('/api/login', 'POST', reqBody)
+    assert.equal(res.status, 201)
+    const managerJWT = (await res.json()).token;
+    reqBody= JSON.stringify({ "description":"a very mediocre hat",})
+    res = await sendRequest('/api/product/'+id_out, 'PUT', reqBody, { authorization: `Bearer ${managerJWT}`})
+    assert.equal(res.status,200)
+    //validate change
+    res = await sendRequest('/api/product/'+id_out, 'GET', null, { authorization: `Bearer ${managerJWT}`})
+    assert.equal(res.status, 200)
+    let product_out2 = await res.json()
+    assert.equal(product_out2[0].description,"a very mediocre hat");
+
+
     reqBody= JSON.stringify({ "description":"a very ugly hat",})
     res = await sendRequest('/api/product/'+id_out, 'PUT', reqBody, { authorization: `Bearer ${admin_jwt}`})
     assert.equal(res.status,200)
     //validate change
     res = await sendRequest('/api/product/'+id_out, 'GET', null, { authorization: `Bearer ${admin_jwt}`})
     assert.equal(res.status, 200)
-    let product_out2 = await res.json()
-    assert.equal(product_out2[0].description,"a very ugly hat")
+    let product_out3 = await res.json()
+    assert.equal(product_out3[0].description,"a very ugly hat")
 
 
     // TODO fill this test to check api PUL

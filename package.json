@@ -1,0 +1,28 @@
+{
+  "name": "hw3-rest-api-server",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "type": "module",
+  "scripts": {
+    "build": "tsc",
+    "start": "node ./dist/index.js",
+    "dev": "tsc-watch --onSuccess \"node ./dist/index.js\" --compiler typescript/bin/tsc",
+    "test": "node scripts/test.js"
+  },
+  "keywords": [],
+  "author": "yevgm",
+  "license": "ISC",
+  "devDependencies": {
+    "@types/node": "^18.11.9",
+    "tsc-watch": "^5.0.3",
+    "typescript": "^4.9.3"
+  },
+  "dependencies": {
+    "bcrypt": "^5.1.0",
+    "dotenv": "^16.0.3",
+    "jsonwebtoken": "^8.5.1",
+    "mongoose": "^6.8.0",
+    "uuid": "^9.0.0"
+  }
+}

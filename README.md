@@ -1,1 +1,1 @@
-# wsp.hw3
+# hw3-rest-api-server

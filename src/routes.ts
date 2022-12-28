@@ -233,7 +233,7 @@ export const changeProductRout = (req: IncomingMessage, res: ServerResponse, id_
 
       const filter = { id: id_or_type };
       // old_prod is the document _before_ update was applied
-      let old_prod = await User.findOneAndUpdate(filter, product_info);
+      let old_prod = await Product.updateOne(filter, product_info);
       if(Object.keys(old_prod).length === 0){
         // Not found 404
         res.statusCode = 404;

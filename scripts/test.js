@@ -508,7 +508,29 @@ async function UpdateProductTest(){
     assert.equal(res.status, 201)
     let admin_jwt = (await res.json()).token
     assert(admin_jwt)
-    // TODO check empty PUT!
+    // POST new product
+    reqBody = JSON.stringify(test_product)
+    res = await sendRequest('/api/product', 'POST', reqBody, { authorization: `Bearer ${admin_jwt}`})
+    assert.equal(res.status, 201)
+    let id_out = (await res.json()).id
+    assert(id_out)
+    // GET the same product
+    res = await sendRequest('/api/product/'+id_out, 'GET', null, { authorization: `Bearer ${admin_jwt}`})
+    assert.equal(res.status, 200)
+    let product_out = await res.json()
+    assert(Object.keys(product_out).length === 1)
+ 
+    //Update product 
+    reqBody= JSON.stringify({ "description":"a very ugly hat",})
+    res = await sendRequest('/api/product/'+id_out, 'PUT', reqBody, { authorization: `Bearer ${admin_jwt}`})
+    assert.equal(res.status,200)
+    //validate change
+    res = await sendRequest('/api/product/'+id_out, 'GET', null, { authorization: `Bearer ${admin_jwt}`})
+    assert.equal(res.status, 200)
+    let product_out2 = await res.json()
+    assert.equal(product_out2[0].description,"a very ugly hat")
+
+
     // TODO fill this test to check api PUL
     // TODO: check if "5" is ok in price and stock
     // TODO: check if "5.5" \ 5.5 is NOT ok in price and stock

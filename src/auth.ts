@@ -6,7 +6,7 @@ import {isStr, tryParseJSONObject} from "./validations.js";
 import User from "./models/user.js";
 
 // TODO: You need to config SERCRET_KEY in render.com dashboard, under Environment section.
-const secretKey = process.env.SECRET_KEY || "BING_CHILLING";
+const secretKey = process.env.SECRET_KEY;
 export const saltRounds:number = 10  // choose hash saltRounds
 
 // Verify JWT token

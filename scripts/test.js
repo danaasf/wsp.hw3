@@ -153,7 +153,7 @@ async function NewProductTest(){
         "name":"small frog",
         "category":"hat",
         "description":"a very cool hat",
-        "price":25,
+        "price":9000,
         "stock":11,
     }
     const bad_test_product2 = {
@@ -318,8 +318,6 @@ async function GetProductTest(){
 
     res = await sendRequest('/api/product/'+id_out, 'GET', null,{ authorization: `Bearer ${jwt}`})
     assert.equal(res.status, 200)
-    let product_out = await res.json()
-    assert(Object.keys(product_out).length === 1)
 
     // Enter 10 hats
     for(let i=0;i<10;i++){
@@ -332,7 +330,7 @@ async function GetProductTest(){
 
     res = await sendRequest('/api/product/hat', 'GET', null,{ authorization: `Bearer ${jwt}`})
     assert.equal(res.status, 200)
-    product_out = await res.json()
+    const product_out = await res.json()
     assert(Object.keys(product_out).length >= 10)
     // Faulty and not found requests
     res = await sendRequest('/api/product', 'GET', null,{ authorization: `Bearer ${jwt}`})
@@ -457,8 +455,6 @@ async function DeleteProductTest(){
     // GET the same product
     res = await sendRequest('/api/product/'+id_out, 'GET', null, { authorization: `Bearer ${admin_jwt}`})
     assert.equal(res.status, 200)
-    let product_out = await res.json()
-    assert(Object.keys(product_out).length === 1)
     // DELETE the same product
     res = await sendRequest('/api/product/'+id_out, 'DELETE',{ authorization: `Bearer ${jwt}`})
     assert.equal(res.status, 401)
@@ -468,7 +464,7 @@ async function DeleteProductTest(){
     assert.equal(res.status, 200)
     res = await sendRequest('/api/product/'+id_out, 'GET', null, { authorization: `Bearer ${admin_jwt}`})
     assert.equal(res.status, 404)
-    product_out = await res.json()
+    const product_out = await res.json()
     assert(product_out.message === ERROR_404)
 
 
@@ -517,8 +513,6 @@ async function UpdateProductTest(){
     // GET the same product
     res = await sendRequest('/api/product/'+id_out, 'GET', null, { authorization: `Bearer ${admin_jwt}`})
     assert.equal(res.status, 200)
-    let product_out = await res.json()
-    assert(Object.keys(product_out).length === 1)
 
     //Update product
     reqBody= JSON.stringify({ "description":"a very ugly hat",})
@@ -548,8 +542,7 @@ async function UpdateProductTest(){
     res = await sendRequest('/api/product/'+id_out, 'GET', null, { authorization: `Bearer ${managerJWT}`})
     assert.equal(res.status, 200)
     let product_out2 = await res.json()
-    assert.equal(product_out2[0].description,"a very mediocre hat");
-
+    assert.equal(product_out2.description,"a very mediocre hat");
 
     reqBody= JSON.stringify({ "description":"a very ugly hat",})
     res = await sendRequest('/api/product/'+id_out, 'PUT', reqBody, { authorization: `Bearer ${admin_jwt}`})
@@ -558,7 +551,7 @@ async function UpdateProductTest(){
     res = await sendRequest('/api/product/'+id_out, 'GET', null, { authorization: `Bearer ${admin_jwt}`})
     assert.equal(res.status, 200)
     let product_out3 = await res.json()
-    assert.equal(product_out3[0].description,"a very ugly hat")
+    assert.equal(product_out3.description,"a very ugly hat")
 
 
     console.log('Update Product test - Passed')
@@ -573,3 +566,4 @@ DeleteProductTest()
 UpdateProductTest()
 
 // TODO: take care of database error with return code 500
+// TODO: deploy to Render, and check the tests in the deployed server, people say that it doesn't work as locally

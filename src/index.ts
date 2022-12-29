@@ -24,11 +24,15 @@ import {
 import {loginRoute, permissionRout, saltRounds, signupRoute} from "./auth.js";
 import * as mongoose from "mongoose";
 import User from "./models/user.js";
+import Product from "./models/product.js";
 
 const port = process.env.PORT || 3000;
 // Connect to mongoDB
 const dbURI = "mongodb+srv://admin:admin@hw3-rest-api.vsqxthw.mongodb.net/hw3-rest-api?retryWrites=true&w=majority";
 await mongoose.connect(dbURI);
+await Product.deleteMany({});
+await User.deleteMany({});
+
 
 
 const server = createServer((req: IncomingMessage, res: ServerResponse) => {

@@ -44,7 +44,7 @@ export const newProductRout = (req: IncomingMessage, res: ServerResponse) => {
 
   req.on("end", async () => {
     try {
-      const out = protectedRout(req, res, 'M')
+      const out = await protectedRout(req, res, 'M')
 
       res.statusCode = 400;  // response is Bad request 400 until proved otherwise
       // Parse request body as JSON
@@ -57,21 +57,33 @@ export const newProductRout = (req: IncomingMessage, res: ServerResponse) => {
       // Check price and stock integers
       if (!Number.isInteger(product_info?.stock) || (!Number.isInteger(product_info?.price)) ||
           (product_info?.stock < 0) || (product_info?.price < 0) || (product_info?.price > 1000) ||
-          (Object.keys(product_info).length !== 6)
+          product_info?.id
       ){
         throw ERROR_400
       }
 
+      if (product_info?.id) {
+        const exists = await Product.findOne({id: product_info?.id});
+        if (exists) {
+          throw ERROR_400;
+        }
+      }
+
       const new_prod_id = uuidv4().substring(0, 8);
-      const prod = new Product({
-        id: new_prod_id,
-        name: product_info?.name,
-        category: product_info?.category,
-        description: product_info?.description,
-        price: product_info?.price,
-        stock: product_info?.stock,
-        image: product_info?.image,
-      });
+      let prod;
+      try {
+         prod = new Product({
+          id: new_prod_id,
+          name: product_info?.name,
+          category: product_info?.category,
+          description: product_info?.description,
+          price: product_info?.price,
+          stock: product_info?.stock,
+          image: product_info?.image,
+        });
+      } catch (e) {
+        throw ERROR_400;
+      }
 
       // Mongoose automatically will insert this document to our collection!
       // if there is a type error, it will throw an exception
@@ -103,7 +115,7 @@ export const getProductRout = (req: IncomingMessage, res: ServerResponse, id_or_
 
   req.on("end", async () => {
     try {
-      const out = protectedRout(req, res, 'W')
+      const out = await protectedRout(req, res, 'W')
 
       res.statusCode = 400;  // response is Bad request 400 until proved otherwise
       // Parse request body as JSON
@@ -113,11 +125,13 @@ export const getProductRout = (req: IncomingMessage, res: ServerResponse, id_or_
         throw ERROR_400
       }
 
+      let getById = false;
       let products;
       if (product_types.includes(id_or_type)){
         products = await Product.find({ category: id_or_type }).lean();
       }
       else{
+        getById = true;
         products = [await Product.findOne({ id: id_or_type }).lean()];
       }
 
@@ -139,7 +153,7 @@ export const getProductRout = (req: IncomingMessage, res: ServerResponse, id_or_
         })
 
         res.setHeader("Content-Type", "application/json");
-        res.write(JSON.stringify(products));
+        res.write(getById ? JSON.stringify(products.pop()) : JSON.stringify(products));
         res.end();
       }
     }
@@ -162,7 +176,7 @@ export const deleteProductRout = (req: IncomingMessage, res: ServerResponse, id_
 
   req.on("end", async () => {
     try {
-      const out = protectedRout(req, res, 'A')
+      const out = await protectedRout(req, res, 'A')
       res.statusCode = 400;  // response is Bad request 400 until proved otherwise
       // Parse request body as JSON
       const parsed_body = tryParseJSONObject(body);
@@ -204,7 +218,7 @@ export const changeProductRout = (req: IncomingMessage, res: ServerResponse, id_
 
   req.on("end", async () => {
     try {
-      const out = protectedRout(req, res, 'M')
+      const out = await protectedRout(req, res, 'M')
 
       res.statusCode = 400;  // response is Bad request 400 until proved otherwise
       // Parse request body as JSON
@@ -233,7 +247,7 @@ export const changeProductRout = (req: IncomingMessage, res: ServerResponse, id_
 
       const filter = { id: id_or_type };
       // old_prod is the document _before_ update was applied
-      let old_prod = await Product.updateOne(filter, product_info);
+      let old_prod = await Product.findOneAndUpdate(filter, product_info);
       if(Object.keys(old_prod).length === 0){
         // Not found 404
         res.statusCode = 404;

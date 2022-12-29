@@ -12,4 +12,5 @@ export const PERMISSION = "PUT /api/permission";
 
 export const permissions = ['W', 'M', 'A'];
 export const product_types = ['t-shirt','hoodie','hat','necklace','bracelet',
-    'shoes','pillow','mug','book','puzzle','cards'];
+    'shoes','pillow','mug','book','puzzle','cards','T-SHIRT','HOODIE','HAT','NECKLACE','BRACELET',
+    'SHOES','PILLOW','MUG','BOOK','PUZZLE','CARDS'];

@@ -6,7 +6,7 @@ import {isStr, tryParseJSONObject} from "./validations.js";
 import User from "./models/user.js";
 
 // TODO: You need to config SERCRET_KEY in render.com dashboard, under Environment section.
-const secretKey = process.env.SECRET_KEY || "your_secret_key";
+const secretKey = process.env.SECRET_KEY || "BING_CHILLING";
 export const saltRounds:number = 10  // choose hash saltRounds
 
 // Verify JWT token
@@ -28,7 +28,7 @@ const checkPermission = (minimal_permission:string, user_permission:string) =>{
 }
 
 // Middelware for all protected routes. You need to expend it, implement premissions and handle with errors.
-export const protectedRout = (req: IncomingMessage, res: ServerResponse, minimal_permission: string = 'W') => {
+export const protectedRout = async (req: IncomingMessage, res: ServerResponse, minimal_permission: string = 'W') => {
   // throws an exception if user has no permissions
   let authHeader = req.headers["authorization"] as string;
   // authorization header needs to look like that: Bearer <JWT>.
@@ -42,15 +42,15 @@ export const protectedRout = (req: IncomingMessage, res: ServerResponse, minimal
 
   // Verify JWT token
   let user = verifyJWT(token);
-  // console.log(!user)
   if (!user) {
     res.statusCode = 401;
     throw "Failed to verify JWT.";
   }
 
   user = user?.db_user
+  const currentUser = await User.findOne({username: user.username});
   // check user permissions to access this route
-  const user_permission = user?.permission
+  const user_permission = currentUser?.permission
    if (!checkPermission(minimal_permission, user_permission)){
      res.statusCode = 403;
      throw ERROR_403;
@@ -101,7 +101,7 @@ export const loginRoute = (req: IncomingMessage, res: ServerResponse) => {
         expiresIn: 86400, // expires in 24 hours
       });
 
-      res.statusCode = 201;
+      res.statusCode = 200;
       res.end(
           JSON.stringify({
             token: token,
@@ -187,7 +187,7 @@ export const permissionRout = (req: IncomingMessage, res: ServerResponse) => {
   });
   req.on("end", async () => {
     try {
-      const out = protectedRout(req, res, 'A')
+      const out = await protectedRout(req, res, 'A')
       res.statusCode = 400;  // response is Bad request 400 until proved otherwise
       // Parse request body as JSON
       const user = tryParseJSONObject(body);
@@ -207,7 +207,7 @@ export const permissionRout = (req: IncomingMessage, res: ServerResponse) => {
       const filter = { username: user.username };
       const update = { permission: user.permission };
       // doc is the document _before_ update was applied
-      let doc = await User.findOneAndUpdate(filter, update);
+      await User.findOneAndUpdate(filter, update);
 
       // Happy flow
       res.statusCode = 200;

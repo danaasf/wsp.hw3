@@ -49,7 +49,7 @@ async function signUpLoginTest(){
     assert.equal(res.status, 201)
 
     res = await sendRequest('/api/login', 'POST', reqBody)
-    assert.equal(res.status, 201)
+    assert.equal(res.status, 200)
     let jwt = (await res.json()).token
     assert(jwt)
 
@@ -102,7 +102,7 @@ async function NewProductTest(){
     assert.equal(res.status, 201)
 
     res = await sendRequest('/api/login', 'POST', reqBody)
-    assert.equal(res.status, 201)
+    assert.equal(res.status, 200)
     let jwt = (await res.json()).token
     assert(jwt)
 
@@ -127,7 +127,7 @@ async function NewProductTest(){
     // admin login
     reqBody = JSON.stringify({ username: "admin", password: "admin" })
     res = await sendRequest('/api/login', 'POST', reqBody)
-    assert.equal(res.status, 201)
+    assert.equal(res.status, 200)
     let admin_jwt = (await res.json()).token
     assert(admin_jwt)
     // admin change permission
@@ -138,7 +138,7 @@ async function NewProductTest(){
     // relogin of user with new permissions - TODO check if it is a correct flow?
     reqBody = JSON.stringify({ username: user, password: pass })
     res = await sendRequest('/api/login', 'POST', reqBody)
-    assert.equal(res.status, 201)
+    assert.equal(res.status, 200)
     jwt = (await res.json()).token
     assert(jwt)
 
@@ -153,7 +153,7 @@ async function NewProductTest(){
         "name":"small frog",
         "category":"hat",
         "description":"a very cool hat",
-        "price":25,
+        "price":9000,
         "stock":11,
     }
     const bad_test_product2 = {
@@ -201,7 +201,7 @@ async function PermissionTest(){
     assert.equal(res.status, 201)
 
     res = await sendRequest('/api/login', 'POST', reqBody)
-    assert.equal(res.status, 201)
+    assert.equal(res.status, 200)
     let jwt1 = (await res.json()).token
     assert(jwt1)
 
@@ -211,7 +211,7 @@ async function PermissionTest(){
     assert.equal(res.status, 201)
 
     res = await sendRequest('/api/login', 'POST', reqBody)
-    assert.equal(res.status, 201)
+    assert.equal(res.status, 200)
     let jwt2 = (await res.json()).token
     assert(jwt2)
 
@@ -227,7 +227,7 @@ async function PermissionTest(){
     // admin login
     reqBody = JSON.stringify({ username: "admin", password: "admin" })
     res = await sendRequest('/api/login', 'POST', reqBody)
-    assert.equal(res.status, 201)
+    assert.equal(res.status, 200)
     let admin_jwt = (await res.json()).token
     assert(admin_jwt)
     // admin change permission
@@ -274,14 +274,14 @@ async function GetProductTest(){
     assert.equal(res.status, 201)
 
     res = await sendRequest('/api/login', 'POST', reqBody)
-    assert.equal(res.status, 201)
+    assert.equal(res.status, 200)
     let jwt = (await res.json()).token
     assert(jwt)
 
     // admin login
     reqBody = JSON.stringify({ username: "admin", password: "admin" })
     res = await sendRequest('/api/login', 'POST', reqBody)
-    assert.equal(res.status, 201)
+    assert.equal(res.status, 200)
     let admin_jwt = (await res.json()).token
     assert(admin_jwt)
     // admin change permission
@@ -306,7 +306,7 @@ async function GetProductTest(){
     // user relogin TODO check if it's ok...(INVALID JWT token after permission change)
     reqBody = JSON.stringify({ username: user, password: pass })
     res = await sendRequest('/api/login', 'POST', reqBody)
-    assert.equal(res.status, 201)
+    assert.equal(res.status, 200)
     jwt = (await res.json()).token
     assert(jwt)
 
@@ -318,8 +318,6 @@ async function GetProductTest(){
 
     res = await sendRequest('/api/product/'+id_out, 'GET', null,{ authorization: `Bearer ${jwt}`})
     assert.equal(res.status, 200)
-    let product_out = await res.json()
-    assert(Object.keys(product_out).length === 1)
 
     // Enter 10 hats
     for(let i=0;i<10;i++){
@@ -332,7 +330,7 @@ async function GetProductTest(){
 
     res = await sendRequest('/api/product/hat', 'GET', null,{ authorization: `Bearer ${jwt}`})
     assert.equal(res.status, 200)
-    product_out = await res.json()
+    const product_out = await res.json()
     assert(Object.keys(product_out).length >= 10)
     // Faulty and not found requests
     res = await sendRequest('/api/product', 'GET', null,{ authorization: `Bearer ${jwt}`})
@@ -355,14 +353,14 @@ async function NotFoundTest(){
     assert.equal(res.status, 201)
 
     res = await sendRequest('/api/login', 'POST', reqBody)
-    assert.equal(res.status, 201)
+    assert.equal(res.status, 200)
     let jwt = (await res.json()).token
     assert(jwt)
 
     // admin login
     reqBody = JSON.stringify({ username: "admin", password: "admin" })
     res = await sendRequest('/api/login', 'POST', reqBody)
-    assert.equal(res.status, 201)
+    assert.equal(res.status, 200)
     let admin_jwt = (await res.json()).token
     assert(admin_jwt)
     // admin change permission
@@ -387,7 +385,7 @@ async function NotFoundTest(){
     // user relogin TODO check if it's ok...(INVALID JWT token after permission change)
     reqBody = JSON.stringify({ username: user, password: pass })
     res = await sendRequest('/api/login', 'POST', reqBody)
-    assert.equal(res.status, 201)
+    assert.equal(res.status, 200)
     jwt = (await res.json()).token
     assert(jwt)
 
@@ -424,7 +422,7 @@ async function DeleteProductTest(){
     assert.equal(res.status, 201)
 
     res = await sendRequest('/api/login', 'POST', reqBody)
-    assert.equal(res.status, 201)
+    assert.equal(res.status, 200)
     let jwt = (await res.json()).token
     assert(jwt)
 
@@ -445,7 +443,7 @@ async function DeleteProductTest(){
     // admin login
     reqBody = JSON.stringify({ username: "admin", password: "admin" })
     res = await sendRequest('/api/login', 'POST', reqBody)
-    assert.equal(res.status, 201)
+    assert.equal(res.status, 200)
     let admin_jwt = (await res.json()).token
     assert(admin_jwt)
     // POST new product
@@ -457,8 +455,6 @@ async function DeleteProductTest(){
     // GET the same product
     res = await sendRequest('/api/product/'+id_out, 'GET', null, { authorization: `Bearer ${admin_jwt}`})
     assert.equal(res.status, 200)
-    let product_out = await res.json()
-    assert(Object.keys(product_out).length === 1)
     // DELETE the same product
     res = await sendRequest('/api/product/'+id_out, 'DELETE',{ authorization: `Bearer ${jwt}`})
     assert.equal(res.status, 401)
@@ -468,7 +464,7 @@ async function DeleteProductTest(){
     assert.equal(res.status, 200)
     res = await sendRequest('/api/product/'+id_out, 'GET', null, { authorization: `Bearer ${admin_jwt}`})
     assert.equal(res.status, 404)
-    product_out = await res.json()
+    const product_out = await res.json()
     assert(product_out.message === ERROR_404)
 
 
@@ -484,7 +480,7 @@ async function UpdateProductTest(){
     assert.equal(res.status, 201)
 
     res = await sendRequest('/api/login', 'POST', reqBody)
-    assert.equal(res.status, 201)
+    assert.equal(res.status, 200)
     const workerJWT = (await res.json()).token
     assert(workerJWT);
 
@@ -505,7 +501,7 @@ async function UpdateProductTest(){
     // admin login
     reqBody = JSON.stringify({ username: "admin", password: "admin" })
     res = await sendRequest('/api/login', 'POST', reqBody)
-    assert.equal(res.status, 201)
+    assert.equal(res.status, 200)
     let admin_jwt = (await res.json()).token
     assert(admin_jwt)
     // POST new product
@@ -517,8 +513,6 @@ async function UpdateProductTest(){
     // GET the same product
     res = await sendRequest('/api/product/'+id_out, 'GET', null, { authorization: `Bearer ${admin_jwt}`})
     assert.equal(res.status, 200)
-    let product_out = await res.json()
-    assert(Object.keys(product_out).length === 1)
 
     //Update product
     reqBody= JSON.stringify({ "description":"a very ugly hat",})
@@ -539,7 +533,7 @@ async function UpdateProductTest(){
     // get new token
     reqBody = JSON.stringify({ username: user, password: pass })
     res = await sendRequest('/api/login', 'POST', reqBody)
-    assert.equal(res.status, 201)
+    assert.equal(res.status, 200)
     const managerJWT = (await res.json()).token;
     reqBody= JSON.stringify({ "description":"a very mediocre hat",})
     res = await sendRequest('/api/product/'+id_out, 'PUT', reqBody, { authorization: `Bearer ${managerJWT}`})
@@ -548,8 +542,7 @@ async function UpdateProductTest(){
     res = await sendRequest('/api/product/'+id_out, 'GET', null, { authorization: `Bearer ${managerJWT}`})
     assert.equal(res.status, 200)
     let product_out2 = await res.json()
-    assert.equal(product_out2[0].description,"a very mediocre hat");
-
+    assert.equal(product_out2.description,"a very mediocre hat");
 
     reqBody= JSON.stringify({ "description":"a very ugly hat",})
     res = await sendRequest('/api/product/'+id_out, 'PUT', reqBody, { authorization: `Bearer ${admin_jwt}`})
@@ -558,34 +551,7 @@ async function UpdateProductTest(){
     res = await sendRequest('/api/product/'+id_out, 'GET', null, { authorization: `Bearer ${admin_jwt}`})
     assert.equal(res.status, 200)
     let product_out3 = await res.json()
-    assert.equal(product_out3[0].description,"a very ugly hat")
-
-
-    // TODO fill this test to check api PUL
-    // TODO: check if "5" is ok in price and stock
-    // TODO: check if "5.5" \ 5.5 is NOT ok in price and stock
-    // // POST new product
-    // reqBody = JSON.stringify(test_product)
-    // res = await sendRequest('/api/product', 'POST', reqBody, { authorization: `Bearer ${admin_jwt}`})
-    // assert.equal(res.status, 201)
-    // let id_out = (await res.json()).id
-    // assert(id_out)
-    // // GET the same product
-    // res = await sendRequest('/api/product/'+id_out, 'GET', null, { authorization: `Bearer ${admin_jwt}`})
-    // assert.equal(res.status, 200)
-    // let product_out = await res.json()
-    // assert(Object.keys(product_out).length === 1)
-    // // DELETE the same product
-    // res = await sendRequest('/api/product/'+id_out, 'DELETE',{ authorization: `Bearer ${jwt}`})
-    // assert.equal(res.status, 401)
-    // res = await sendRequest('/api/product/'+id_out, 'DELETE', null,{ authorization: `Bearer ${jwt}`})
-    // assert.equal(res.status, 403)
-    // res = await sendRequest('/api/product/'+id_out, 'DELETE', null,{ authorization: `Bearer ${admin_jwt}`})
-    // assert.equal(res.status, 200)
-    // res = await sendRequest('/api/product/'+id_out, 'GET', null, { authorization: `Bearer ${admin_jwt}`})
-    // assert.equal(res.status, 404)
-    // product_out = await res.json()
-    // assert(product_out.message === ERROR_404)
+    assert.equal(product_out3.description,"a very ugly hat")
 
 
     console.log('Update Product test - Passed')
@@ -599,6 +565,5 @@ NotFoundTest()
 DeleteProductTest()
 UpdateProductTest()
 
-// TODO: check tests from whatsapp
 // TODO: take care of database error with return code 500
 // TODO: deploy to Render, and check the tests in the deployed server, people say that it doesn't work as locally

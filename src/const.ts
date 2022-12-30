@@ -1,6 +1,7 @@
 export const ERROR_401 = "ERROR_401 - Unauthorized";
 export const ERROR_404 = "ERROR_404 - Not Found.";
 export const ERROR_403 = "ERROR_403 - Forbidden";
+export const ERROR_500 = "ERROR_500 - Unknown Sever error";
 export const ERROR_400 = "ERROR_400 - Bad Request.";
 export const GET_PRODUCT = "GET /api/product";
 export const CHANGE_PRODUCT = "PUT /api/product";

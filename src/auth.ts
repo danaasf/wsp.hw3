@@ -1,7 +1,7 @@
 import { IncomingMessage, ServerResponse } from "http";
 import jwt from "jsonwebtoken";
 import * as bcrypt from "bcrypt";
-import {ERROR_400, ERROR_401, ERROR_403, permissions} from "./const.js";
+import {ERROR_400, ERROR_401, ERROR_403, ERROR_500, permissions} from "./const.js";
 import {isStr, tryParseJSONObject} from "./validations.js";
 import User from "./models/user.js";
 
@@ -47,7 +47,14 @@ export const protectedRout = async (req: IncomingMessage, res: ServerResponse, m
   }
 
   user = user?.db_user
-  const currentUser = await User.findOne({username: user.username});
+  let currentUser;
+  try {
+    currentUser = await User.findOne({username: user.username});
+  }catch (e) {
+    res.statusCode = 500;
+    throw ERROR_500;
+  }
+
   // check user permissions to access this route
   const user_permission = currentUser?.permission
    if (!checkPermission(minimal_permission, user_permission)){

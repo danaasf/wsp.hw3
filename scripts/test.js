@@ -6,7 +6,7 @@ const ERROR_404 = "ERROR_404 - Not Found.";
 const args = process.argv.slice(2);
 assert(args.length <= 1, 'usage: node test.js [url]');
 
-const url = (args.length == 0) ? 'http://localhost:3000' : args[0];
+const url = (args.length === 0) ? 'http://localhost:3000' : args[0];
 
 function sendRequest(endpoint, method = 'GET', body = '', headers = {}) {
     const address = `${url}${endpoint}`;
@@ -115,6 +115,13 @@ async function NewProductTest(){
         "stock":11,
         "image":"shopify.com/s/files/1/0190",
     }
+    const test_product_no_image = {
+        "name":"small frog",
+        "category":"hat",
+        "description":"a very cool hat",
+        "price":25,
+        "stock":11,
+    }
     reqBody = JSON.stringify(test_product)
     res = await sendRequest('/api/product', 'POST', reqBody, { authorization: `Bearer ${jwt}`})
     assert.equal(res.status, 403)
@@ -135,7 +142,7 @@ async function NewProductTest(){
     res = await sendRequest('/api/permission', 'PUT', reqBody, { authorization: `Bearer ${admin_jwt}`})
     assert.equal(res.status, 200)
     // try to add new product again - happy flow
-    // relogin of user with new permissions - TODO check if it is a correct flow?
+    // relogin of user with new permissions
     reqBody = JSON.stringify({ username: user, password: pass })
     res = await sendRequest('/api/login', 'POST', reqBody)
     assert.equal(res.status, 200)
@@ -148,12 +155,18 @@ async function NewProductTest(){
     let id_out = (await res.json()).id
     assert(id_out)
 
+    reqBody = JSON.stringify(test_product_no_image)
+    res = await sendRequest('/api/product', 'POST', reqBody, { authorization: `Bearer ${jwt}`})
+    assert.equal(res.status, 201)
+    id_out = (await res.json()).id
+    assert(id_out)
+
     // check bad product input
     const bad_test_product1 = {
         "name":"small frog",
         "category":"hat",
         "description":"a very cool hat",
-        "price":9000,
+        "price":9999,
         "stock":11,
     }
     const bad_test_product2 = {
@@ -173,10 +186,36 @@ async function NewProductTest(){
         "image":"shopify.com/s/files/1/0190",
     }
     const bad_test_product4 = {}
+    const good_test_product5 = {
+        "name":"small frog",
+        "category":"hat",
+        "description":"a very cool hat",
+        "price":999.5,
+        "stock":11,
+        "image":"shopify.com/s/files/1/0190"
+    }
+    const good_test_product6 = {
+        "name":"small frog",
+        "category":"hat",
+        "description":"a very cool hat",
+        "price":999,
+        "stock":11.0,
+        "image":"shopify.com/s/files/1/0190"
+    }
+    const bad_test_product7 = {
+        "name":"small frog",
+        "category":"hat",
+        "description":"a very cool hat",
+        "price":999,
+        "image":"shopify.com/s/files/1/0190"
+    }
     let reqBody1 = JSON.stringify(bad_test_product1)
     let reqBody2 = JSON.stringify(bad_test_product2)
     let reqBody3 = JSON.stringify(bad_test_product3)
     let reqBody4 = JSON.stringify(bad_test_product4)
+    let reqBody5 = JSON.stringify(good_test_product5)
+    let reqBody6 = JSON.stringify(good_test_product6)
+    let reqBody7 = JSON.stringify(bad_test_product7)
     res = await sendRequest('/api/product', 'POST', reqBody1, { authorization: `Bearer ${jwt}`})
     assert.equal(res.status, 400)
     res = await sendRequest('/api/product', 'POST', reqBody2, { authorization: `Bearer ${jwt}`})
@@ -185,9 +224,12 @@ async function NewProductTest(){
     assert.equal(res.status, 400)
     res = await sendRequest('/api/product', 'POST', reqBody4, { authorization: `Bearer ${jwt}`})
     assert.equal(res.status, 400)
-
-    // TODO try to add a Product with non integer stock and\or price
-    // TODO try to add a product without image field (which is optional)! (should fail in current implementation, must fix)
+    res = await sendRequest('/api/product', 'POST', reqBody5, { authorization: `Bearer ${jwt}`})
+    assert.equal(res.status, 201)
+    res = await sendRequest('/api/product', 'POST', reqBody6, { authorization: `Bearer ${jwt}`})
+    assert.equal(res.status, 201)
+    res = await sendRequest('/api/product', 'POST', reqBody7, { authorization: `Bearer ${jwt}`})
+    assert.equal(res.status, 400)
 
     console.log('New Product test - Passed')
 }
@@ -303,13 +345,6 @@ async function GetProductTest(){
         "image":"shopify.com/s/files/1/0190",
     }
 
-    // user relogin TODO check if it's ok...(INVALID JWT token after permission change)
-    reqBody = JSON.stringify({ username: user, password: pass })
-    res = await sendRequest('/api/login', 'POST', reqBody)
-    assert.equal(res.status, 200)
-    jwt = (await res.json()).token
-    assert(jwt)
-
     reqBody = JSON.stringify(test_product)
     res = await sendRequest('/api/product', 'POST', reqBody, { authorization: `Bearer ${jwt}`})
     assert.equal(res.status, 201)
@@ -381,13 +416,6 @@ async function NotFoundTest(){
         "stock":11,
         "image":"shopify.com/s/files/1/0190",
     }
-
-    // user relogin TODO check if it's ok...(INVALID JWT token after permission change)
-    reqBody = JSON.stringify({ username: user, password: pass })
-    res = await sendRequest('/api/login', 'POST', reqBody)
-    assert.equal(res.status, 200)
-    jwt = (await res.json()).token
-    assert(jwt)
 
     reqBody = JSON.stringify(test_product)
     res = await sendRequest('/api/product', 'GET', null, { authorization: `Bearer ${jwt}`})
@@ -493,10 +521,9 @@ async function UpdateProductTest(){
         "stock":11,
         "image":"shopify.com/s/files/1/0190",
     }
-    // reqBody = JSON.stringify(test_product)
-    // res = await sendRequest('/api/product', 'POST', reqBody, { authorization: `Bearer ${jwt}`})
-    // assert.equal(res.status, 403)
-
+    reqBody = JSON.stringify(test_product)
+    res = await sendRequest('/api/product', 'POST', reqBody, { authorization: `Bearer ${workerJWT}`})
+    assert.equal(res.status, 403)
 
     // admin login
     reqBody = JSON.stringify({ username: "admin", password: "admin" })
@@ -564,6 +591,3 @@ GetProductTest()
 NotFoundTest()
 DeleteProductTest()
 UpdateProductTest()
-
-// TODO: take care of database error with return code 500
-// TODO: deploy to Render, and check the tests in the deployed server, people say that it doesn't work as locally

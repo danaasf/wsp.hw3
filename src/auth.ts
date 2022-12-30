@@ -5,8 +5,8 @@ import {ERROR_400, ERROR_401, ERROR_403, permissions} from "./const.js";
 import {isStr, tryParseJSONObject} from "./validations.js";
 import User from "./models/user.js";
 
-// TODO: You need to config SERCRET_KEY in render.com dashboard, under Environment section.
 const secretKey = process.env.SECRET_KEY;
+// const secretKey = process.env.SECRET_KEY || "your_secret_key";
 export const saltRounds:number = 10  // choose hash saltRounds
 
 // Verify JWT token
@@ -32,7 +32,6 @@ export const protectedRout = async (req: IncomingMessage, res: ServerResponse, m
   // throws an exception if user has no permissions
   let authHeader = req.headers["authorization"] as string;
   // authorization header needs to look like that: Bearer <JWT>.
-  // TODO: Not sure current validation is enough
   let authHeaderSplited = authHeader && authHeader.split(" ");
   const token = authHeaderSplited && authHeaderSplited[0] === 'Bearer' && authHeaderSplited[1];
   if (!token) {
@@ -100,7 +99,6 @@ export const loginRoute = (req: IncomingMessage, res: ServerResponse) => {
       const token = jwt.sign({db_user}, secretKey, {
         expiresIn: 86400, // expires in 24 hours
       });
-
       res.statusCode = 200;
       res.end(
           JSON.stringify({

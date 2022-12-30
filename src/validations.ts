@@ -29,3 +29,4 @@ export function isStr(val) {
     return typeof val === 'string' || val instanceof String
 }
 
+export function myIsNumber(n) { return !isNaN(parseFloat(n)) && !isNaN(n - 0) && !isStr(n)  }

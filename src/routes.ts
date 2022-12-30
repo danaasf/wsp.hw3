@@ -4,7 +4,7 @@ import {ERROR_400, ERROR_404, product_types} from "./const.js";
 import Product, {product_props} from './models/product.js';
 import {isStr, tryParseJSONObject} from "./validations.js"
 import { v4 as uuidv4 } from "uuid";
-import User from "./models/user.js";
+import {myIsNumber} from "./validations.js";
 
 
 export const createRoute = (url: string, method: string, output:{[key:string]: string}) => {
@@ -55,7 +55,7 @@ export const newProductRout = (req: IncomingMessage, res: ServerResponse) => {
       }
 
       // Check price and stock integers
-      if (!Number.isInteger(product_info?.stock) || (!Number.isInteger(product_info?.price)) ||
+      if (!Number.isInteger(product_info?.stock) || (!myIsNumber(product_info?.price)) ||
           (product_info?.stock < 0) || (product_info?.price < 0) || (product_info?.price > 1000) ||
           product_info?.id
       ){
@@ -187,16 +187,9 @@ export const deleteProductRout = (req: IncomingMessage, res: ServerResponse, id_
 
       let products = await Product.deleteOne({ id: id_or_type }).lean();
 
-      if(products.deletedCount === 0){
-        // Not found 404
-        res.statusCode = 404;
-        throw ERROR_404
-      }
-      else {
-        // Happy flow
-        res.statusCode = 200;
-        res.end();
-      }
+      // Happy flow - Still true if no product were deleted
+      res.statusCode = 200;
+      res.end();
     }
     catch (e) {
       // Something happened
